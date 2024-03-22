@@ -14,7 +14,7 @@ def clear_screen():
 
 # Handles the input of the user
 # Will reset the current screen in case of invalid input
-def get_valid_input(title, text="", board_menu=False):
+def get_valid_input(title, text, board_menu=False, board_size=0):
 
     # Formats a string into options
     def turn_into_options(text):
@@ -38,10 +38,16 @@ def get_valid_input(title, text="", board_menu=False):
         return options + "\n\n-> "
 
     if board_menu:
-        options = "[?] Select any number from 3 to 7\n[0] Go back\n\n-> "
-        viable_options = [str(i) for i in range(3, 8)] + ['0']
+        # if one board size is 2, don't allow the other to be 2
+        if board_size == 2:
+            options        = "[?] Select any number from 3 to 7\n[0] Go back\n\n-> "
+            viable_options = [str(i) for i in range(3, 8)] + ['0']
+        else:
+        # if one board size isn't 2, allow the other to be 2
+            options        = "[?] Select any number from 2 to 7\n[0] Go back\n\n-> "
+            viable_options = [str(i) for i in range(2, 8)] + ['0']
     else:
-        options = turn_into_options(text)
+        options        = turn_into_options(text)
         viable_options = [s[0] for s in options.split('[') if len(s) > 1 and s[0].isdigit()]
 
     while True:
@@ -52,6 +58,7 @@ def get_valid_input(title, text="", board_menu=False):
 
             if option in viable_options:
                 return option
+
             print(f"Invalid input. Please type again")
             sleep(1.25)
         except (KeyboardInterrupt, EOFError):

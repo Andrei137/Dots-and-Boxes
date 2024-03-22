@@ -7,7 +7,7 @@ class Algorithm(Enum):
     BAYESIAN_NETWORK = 3
 
     def __str__(self):
-        # IDA* looks better with the * symbol
+        # IDA* looks better than Ida Star
         if self == Algorithm.IDA_STAR:
             return "IDA*"
         return self.name.replace('_', ' ').title()

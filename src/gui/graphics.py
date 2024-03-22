@@ -1,6 +1,6 @@
 from time import sleep
 from os import environ
-environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable Hello message from pygame 
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable Hello message from pygame
 import pygame
 
 
@@ -25,10 +25,11 @@ class Graphics:
     def get_instance(cls, game):
         if cls.instance is None:
             cls.instance = cls.__new__(cls)
+            board        = game.game_board
 
             # make the dimensions of the screen dynamic
-            cls.screen_width  = (Graphics.scale * game.game_board.no_columns - 1) * Graphics.box_length
-            cls.screen_height = (Graphics.scale * game.game_board.no_lines - 1) * Graphics.box_length
+            cls.screen_width  = (Graphics.scale * board.no_columns - 1) * Graphics.box_length
+            cls.screen_height = (Graphics.scale * board.no_lines - 1) * Graphics.box_length
 
             # the images are scaled to fit the boxes
             cls.horizontal_line = pygame.transform.scale(Graphics.line_image, (Graphics.box_length, Graphics.box_length))
@@ -38,43 +39,46 @@ class Graphics:
             cls.o               = pygame.transform.scale(Graphics.o_image, (Graphics.box_length, Graphics.box_length))
         return cls.instance
 
-    # In case we modify the game board dimensions, we need to update the screen dimensions
+    # In case the game board dimensions got modified, update the screen dimensions
     @classmethod
     def update_width_height(cls, game):
-        cls.screen_width  = (Graphics.scale * game.game_board.no_columns - 1) * Graphics.box_length
-        cls.screen_height = (Graphics.scale * game.game_board.no_lines - 1) * Graphics.box_length
+        board = game.game_board
+
+        cls.screen_width  = (Graphics.scale * board.no_columns - 1) * Graphics.box_length
+        cls.screen_height = (Graphics.scale * board.no_lines - 1) * Graphics.box_length
 
     # Displays the box at the given position
     @staticmethod
     def display_box(game, line, column):
         graphics = Graphics.get_instance(game)
+        board    = game.game_board
 
         if not (line & 1):
             if not (column & 1):
-                # if both coordinates are even, we have a dot
+                # both coordinates are even -> dot
                 Graphics.screen.blit(graphics.dot, (column * Graphics.box_length, line * Graphics.box_length))
             else:
-                # if we have an odd column and an even line, we have a horizontal line (if it exists)
-                if line != Graphics.scale * game.game_board.no_lines and game.game_board.boxes[line // Graphics.scale][column // Graphics.scale].up:
+                # odd column and even line -> horizontal line (if it exists)
+                if line != Graphics.scale * board.no_lines and board.boxes[line // Graphics.scale][column // Graphics.scale].up:
                     Graphics.screen.blit(graphics.horizontal_line, (column * Graphics.box_length, line * Graphics.box_length))
 
                 # special case for the last line
-                if line == Graphics.scale * game.game_board.no_lines and game.game_board.boxes[line // Graphics.scale - 1][column // Graphics.scale].down:
+                if line == Graphics.scale * board.no_lines and board.boxes[line // Graphics.scale - 1][column // Graphics.scale].down:
                     Graphics.screen.blit(graphics.horizontal_line, (column * Graphics.box_length, line * Graphics.box_length))
         elif not (column & 1):
-            # if we have an even column and an odd line, we have a vertical line (if it exists)
-            if column != Graphics.scale * game.game_board.no_columns and game.game_board.boxes[line // Graphics.scale][column // Graphics.scale].left:
+            # even column and odd line -> vertical line (if it exists)
+            if column != Graphics.scale * board.no_columns and board.boxes[line // Graphics.scale][column // Graphics.scale].left:
                 Graphics.screen.blit(graphics.vertical_line, (column * Graphics.box_length, line * Graphics.box_length))
 
             # special case for the last column
-            if column == Graphics.scale * game.game_board.no_columns and game.game_board.boxes[line // Graphics.scale][column // Graphics.scale - 1].right:
+            if column == Graphics.scale * board.no_columns and board.boxes[line // Graphics.scale][column // Graphics.scale - 1].right:
                 Graphics.screen.blit(graphics.vertical_line, (column * Graphics.box_length, line * Graphics.box_length))
-        # if both coordinates are odd, we might have a symbol
+        # both coordinates are odd -> symbol
         elif line & 1 == column & 1 == 1:
-            # check if we have X or O
-            if game.game_board.boxes[line // Graphics.scale][column // Graphics.scale].symbol == 'X':
+            # check if the symbol is X or O to display it
+            if board.boxes[line // Graphics.scale][column // Graphics.scale].symbol == 'X':
                 Graphics.screen.blit(graphics.x, (column * Graphics.box_length, line * Graphics.box_length))
-            elif game.game_board.boxes[line // Graphics.scale][column // Graphics.scale].symbol == 'O':
+            elif board.boxes[line // Graphics.scale][column // Graphics.scale].symbol == 'O':
                 Graphics.screen.blit(graphics.o, (column * Graphics.box_length, line * Graphics.box_length))
 
     # Displays the current game board and return the current boxes
@@ -82,12 +86,14 @@ class Graphics:
     def display_game_board(game):
         # make the screen grey
         Graphics.screen.fill(Graphics.grey)
-        boxes = []
 
-        for line in range(Graphics.scale * game.game_board.no_lines + 1):
+        boxes = []
+        board = game.game_board
+
+        for line in range(Graphics.scale * board.no_lines + 1):
             box_line = []
 
-            for column in range(Graphics.scale * game.game_board.no_columns + 1):
+            for column in range(Graphics.scale * board.no_columns + 1):
                 # create a box
                 area = pygame.Rect(column * (Graphics.box_length), line * (Graphics.box_length),
                                    Graphics.box_length, Graphics.box_length)
@@ -109,18 +115,20 @@ class Graphics:
     @staticmethod
     def player_click(game, boxes, finished=False):
         running = True
+        board   = game.game_board
+
         while running:
             try:
                 for current_event in pygame.event.get():
-                    # if the user closes the window, we quit the game
+                    # if the user closes the window, quit the game
                     if current_event.type == pygame.QUIT:
                         running = False
-                    # if the user clicks the mouse, we check if the click was on a line
+                    # if the user clicks the mouse, check if the click was on a line
                     elif current_event.type == pygame.MOUSEBUTTONDOWN and not finished:
                         position = pygame.mouse.get_pos()
 
-                        for line in range(Graphics.scale * game.game_board.no_lines - 1):
-                            for column in range(Graphics.scale * game.game_board.no_columns - 1):
+                        for line in range(Graphics.scale * board.no_lines - 1):
+                            for column in range(Graphics.scale * board.no_columns - 1):
                                 # the click is on a line if it the coordinates have different parity
                                 if boxes[line][column].collidepoint(position) and line % Graphics.scale != column % Graphics.scale:
                                     return line, column
@@ -134,8 +142,10 @@ class Graphics:
     def start_graphics(game):
         pygame.init()
         pygame.display.set_caption('Dots and Boxes')
-        graphics = Graphics.get_instance(game)
+
+        graphics        = Graphics.get_instance(game)
         Graphics.screen = pygame.display.set_mode((graphics.screen_width, graphics.screen_height))
+
         return Graphics.display_game_board(game)
 
     # Quits the graphics interface

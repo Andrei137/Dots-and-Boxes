@@ -1,22 +1,23 @@
-from . import board
-from gui import graphics
-from ai import alpha_beta
+import time
+from .board import Board
+from gui.graphics import Graphics
+from ai.alpha_beta import Alpha_Beta
 from misc import input_handler, heart, Algorithm, Difficulty
-from copy import deepcopy
 
 
 class Game:
-    instance = None  # Singleton class
-
-    # Settings
-    algorithm             = Algorithm.ALPHA_BETA  # Algorithm enum
-    difficulty            = Difficulty.MEDIUM  # Difficulty enum
-    player_symbol         = board.Board.max_symbol  # max first, min second
-    pvp                   = False  # pvp or pve
-    gui                   = True  # bool toggle
+    # Singleton class
+    instance = None
 
     # The game board
-    game_board = board.Board()
+    game_board = Board()
+
+    # Settings
+    algorithm     = Algorithm.ALPHA_BETA  # Algorithm enum
+    difficulty    = Difficulty.MEDIUM  # Difficulty enum
+    player_symbol = Board.max_symbol  # max first, min second
+    pvp           = False  # PvP or PvE
+    gui           = True  # GUI or CLI
 
     # Singleton class
     @classmethod
@@ -25,19 +26,21 @@ class Game:
             cls.instance = cls.__new__(cls)
         return cls.instance
 
-    # Represents the current state of the game
-    def __str__(self):
-        return str(self.game_board)
+    # The actual board representation
+    @staticmethod
+    def __str__():
+        return str(Game.game_board)
 
-    def __repr__(self):
-        return repr(self.game_board)
+    # Bitset representation of the board
+    @staticmethod
+    def __repr__():
+        return repr(Game.game_board)
 
     # Resets the game
     @staticmethod
     def reset():
-        Game.game_board                 = board.Board()
-        Game.completed_box              = False
-        Game.max_score = Game.min_score = 0
+        Game.game_board    = Board()
+        Game.completed_box = False
 
     # Quits the game, printing a heart if exiting from the main menu
     @staticmethod
@@ -47,15 +50,23 @@ class Game:
             heart.Heart().print_full_heart()
         exit(0)
 
+    # Returns a string with the current player
     @staticmethod
-    def get_current_player():
+    def print_current_player():
         if Game.pvp:
-            return f"Current player: {Game.game_board.current_player}"
+            # if the game mode is PvP, print player X or player O
+            print(f"Current player: {Game.game_board.current_player}", end="\n\n")
         else:
+            # if the game mode is PvE, return the player or the computer
             if Game.game_board.current_player == Game.player_symbol:
-                return f"Player's turn"
+                print(f"Player's turn")
             else:
-                return f"Computer's turn"
+                print("Computer is thinking", end='')
+
+                # Loading effect
+                for _ in range(3):
+                    print(".", end='', flush=True)
+                    time.sleep(0.25)
 
     # Gets a point position from the user
     @staticmethod
@@ -64,7 +75,7 @@ class Game:
         print(Game.get_instance())
 
         try:
-            print(Game.get_current_player(), end="\n\n")
+            Game.print_current_player()
             print("[0] Back")
             print("[?] Select a point (line-column)")
             position = input("\n-> ")
@@ -85,26 +96,28 @@ class Game:
         except (KeyboardInterrupt, EOFError):
             Game.quit()
 
+    # Gets a direction from the user, from the previously selected point
     @staticmethod
     def get_direction_from_user(i, j):
         input_handler.clear_screen()
         print(Game.get_instance())
 
-        print(Game.get_current_player(), end="\n\n")
+        Game.print_current_player()
         print(f"Point: {i + 1}-{j + 1} ")
         print("[0] Back")
 
-        options = Game.game_board.get_direction_options(i, j)
+        board = Game.game_board
+        options = board.get_direction_options(i, j)
 
-        # if we didn't find a possible direction from the current point, ask the user for another one
+        # if it didn't find a possible direction from the current point, ask the user for another one
         if len(options) == 0:
             Game.get_coordinates_from_user()
-        # if we only have one option, make the move, no point asking the user to input it too
+        # if there is only one option, make the move, no point asking the user to input it too
         elif options.count("or") == 0:
             # remove the [] from the string
             direction = options[1] + options[3:]
 
-            Game.game_board.make_move(i, j, direction)
+            board.make_move(i, j, direction)
         else:
             # let the user choose the direction
             print("[?] Select a direction (" + options + ") ")
@@ -120,29 +133,33 @@ class Game:
                     if not any(option.startswith(direction_temp) for option in options.split(' or ')) or direction == '':
                         Game.get_direction_from_user(i, j)
 
-                    Game.game_board.make_move(i, j, direction)
+                    board.make_move(i, j, direction)
             except (KeyboardInterrupt, EOFError):
                 Game.quit()
 
     # Prints the final score and the winner, also waits for input to continue
+    # For the GUI, that input means quitting the window
+    # For the CLI, that input means pressing any key to continue
     @staticmethod
     def print_result(boxes=[]):
         input_handler.clear_screen()
 
+        board = Game.game_board
+
         if not Game.gui:
             print(Game.get_instance(), end="\n\n")
 
-        print(f"Player {board.Board.max_symbol}: " + str(Game.game_board.max_score) + " points")
-        print(f"Player {board.Board.min_symbol}: " + str(Game.game_board.min_score) + " points", end="\n\n")
+        print(f"Player {Board.max_symbol}: " + str(board.max_score) + " points")
+        print(f"Player {Board.min_symbol}: " + str(board.min_score) + " points", end="\n\n")
 
-        if Game.game_board.max_score == Game.game_board.min_score:
+        if board.max_score == board.min_score:
             print("It's a tie!")
         else:
-            print("Player " + (f"{board.Board.max_symbol}" if Game.game_board.max_score > Game.game_board.min_score else f"{board.Board.min_symbol}") + " won!")
+            print("Player " + (f"{Board.max_symbol}" if board.max_score > board.min_score else f"{Board.min_symbol}") + " won!")
 
         if Game.gui:
-            graphics.Graphics().player_click(Game.get_instance(), boxes, True)
-            graphics.Graphics().quit_graphics()
+            Graphics().player_click(Game.get_instance(), boxes, True)
+            Graphics().quit_graphics()
 
         else:
             try:
@@ -154,20 +171,30 @@ class Game:
     @staticmethod
     def play():
         game = Game.get_instance()
+        board = game.game_board
 
         if Game.gui:
-            boxes = graphics.Graphics().start_graphics(game)
+            boxes = Graphics().start_graphics(game)
 
         while not Game.game_board.is_finished():
             input_handler.clear_screen()
-            print(Game.get_current_player())
+            Game.print_current_player()
 
-            if not Game.pvp and Game.game_board.current_player != Game.player_symbol:
+            if not Game.pvp and board.current_player != Game.player_symbol:
                 if Game.algorithm == Algorithm.ALPHA_BETA:
-                    i, j, direction = alpha_beta.Alpha_Beta.get_move(game.game_board)
-                Game.game_board.make_move(i, j, direction)
+                    time1 = time.time()
+                    i, j, direction = Alpha_Beta.get_move(game.game_board)
+                    time2 = time.time()
+
+                    
+                board.make_move(i, j, direction)
                 if Game.gui:
-                    boxes = graphics.Graphics().display_game_board(game)
+                    boxes = Graphics().display_game_board(game)
+
+                if abs(time2 - time1) > 0.01:
+                    input_handler.clear_screen()
+                    print(f"Computer thought for {time2 - time1:.2f} seconds")
+                    time.sleep(1)
             else:
                 if Game.gui:
                     score = 0
@@ -176,29 +203,29 @@ class Game:
 
                     while not valid_move:
                         try:
-                            i, j = graphics.Graphics().player_click(game, boxes)
+                            i, j = Graphics().player_click(game, boxes)
 
                             if i == j and i is None:
-                                graphics.Graphics().quit_graphics()
+                                Graphics().quit_graphics()
                                 Game.reset()
                                 Game.main_menu()
                             elif not (j & 1):
-                                valid_move = Game.game_board.make_move(i // 2, j // 2, "down")
-                                boxes = graphics.Graphics().display_game_board(game)
+                                valid_move = board.make_move(i // 2, j // 2, "down")
+                                boxes = Graphics().display_game_board(game)
                             else:
-                                valid_move = Game.game_board.make_move(i // 2, j // 2, "right")
-                                boxes = graphics.Graphics().display_game_board(game)
+                                valid_move = board.make_move(i // 2, j // 2, "right")
+                                boxes = Graphics().display_game_board(game)
 
-                            boxes = graphics.Graphics().display_game_board(game)
+                            boxes = Graphics().display_game_board(game)
                         except KeyboardInterrupt:
-                            graphics.Graphics().quit_graphics()
+                            Graphics().quit_graphics()
                             Game.reset()
                             Game.main_menu()
                 else:
                     Game.get_coordinates_from_user()
 
-            if not Game.game_board.completed_box:
-                Game.game_board.current_player = Game.game_board.get_opponent()
+            if not board.completed_box:
+                board.current_player = board.get_opponent()
 
         if Game.gui:
             Game.print_result(boxes)
@@ -236,7 +263,7 @@ class Game:
 
             if option != '0':
                 Game.difficulty = Difficulty.select_difficulty(option)
-                alpha_beta.Alpha_Beta.set_difficulty(str(Game.difficulty))
+                Alpha_Beta.set_difficulty(str(Game.difficulty))
         except KeyboardInterrupt:
             Game.quit()
 
@@ -244,27 +271,38 @@ class Game:
     @staticmethod
     def change_game_board_sizes():
         try:
-            option = input_handler.get_valid_input("< Choose the number of dots per line >", board_menu=True)
+            option = input_handler.get_valid_input("< Choose the number of dots per line >", '', True)
 
             if option != '0':
                 # first change the line numbers
-                board.Board.no_lines = int(option)
+                Board.no_lines = int(option)
 
                 try:
-                    option = input_handler.get_valid_input("< Choose the number of dots per column >", board_menu=True)
+                    option = input_handler.get_valid_input("< Choose the number of dots per column >", '', True, Board.no_lines)
 
                     if option != '0':
                         # then change the column number
-                        board.Board.no_columns = int(option)
+                        Board.no_columns = int(option)
                 except KeyboardInterrupt:
                     Game.quit()
+
+            if Game.gui:
+                # in case the game_board size changes, reset the width and height of the window
+                Graphics.update_width_height(Game.get_instance())
+
+            Game.reset()
+
         except KeyboardInterrupt:
             Game.quit()
 
+    @staticmethod
+    def toggle_gamemode():
+        Game.pvp = not Game.pvp
+
     # Changes the starting player
     @staticmethod
-    def change_starting_player():
-        Game.player_symbol = board.Board.min_symbol if Game.player_symbol == board.Board.max_symbol else board.Board.max_symbol
+    def switch_starting_player():
+        Game.player_symbol = Board.min_symbol if Game.player_symbol == Board.max_symbol else Board.max_symbol
 
     # Toggles the GUI
     @staticmethod
@@ -272,10 +310,10 @@ class Game:
         Game.gui = not Game.gui
 
         if Game.gui:
-            # if we turn the GUI on, we need to reset the width and height of the window in case they were changed
-            graphics.Graphics.update_width_height(Game.get_instance())
+            # if the GUI is turned on, reset the width and height of the window in case they were changed
+            Graphics.update_width_height(Game.get_instance())
 
-    # display the logo of the project
+    # Displays the logo of the game
     @staticmethod
     def logo():
         return " _____        _                  ____                            \n" + \
@@ -285,24 +323,47 @@ class Game:
                "| |__| | (_) | |_\\__ \\ | (_>  < | |_) | (_) >  <  __/\\__ \\   \n" + \
                "|_____/ \\___/ \\__|___/  \\___/\\/ |____/ \\___/_/\\_\\___||___/\n"
 
-    # Prints the game menu and gets an option from the user
     @staticmethod
-    def main_menu():
-        options = "Start game, " \
-                + "Change the computer's algorithm (" + str(Game.algorithm) + "), " \
-                + "Change difficulty (" + str(Game.difficulty) + "), " \
-                + "Change the board sizes (" + str(board.Board.no_lines) + "x" + str(board.Board.no_columns) + "), " \
-                + "Choose the game type (Pv" + ("P" if Game.pvp else "E") + "), "
-        if not Game.pvp:
-            options += "Switch starting player (" + ("Player" if Game.player_symbol == board.Board.max_symbol else "Computer") + " goes first), "
-        options +="Toggle GUI (" + ("On" if Game.gui else "Off") + "), " \
-                + "Quit"
+    def main_menu_pvp():
+        options = "Start game, " + \
+                  "Change the board sizes (" + str(Board.no_lines) + "x" + str(Board.no_columns) + "), " + \
+                  "Choose the game type (Pv" + ("P" if Game.pvp else "E") + "), " + \
+                  "Toggle GUI (" + ("On" if Game.gui else "Off") + "), " + \
+                  "Quit"
 
         try:
             option = input_handler.get_valid_input(Game.logo() + "\n\n< Choose an option >", options)
 
             if option == '0':
-                # we exit the game and print a heart :3
+                Game.quit(True)
+            else:
+                if option == '1':
+                    Game.play()
+                elif option == '2':
+                    Game.change_game_board_sizes()
+                elif option == '3':
+                    Game.toggle_gamemode()
+                elif option == '4':
+                    Game.toggle_gui()
+
+                Game.main_menu()
+        except KeyboardInterrupt:
+            Game.quit()
+
+    @staticmethod
+    def main_menu_pve():
+        options = "Start game, " + \
+                  "Change the computer's algorithm (" + str(Game.algorithm) + "), " + \
+                  "Change difficulty (" + str(Game.difficulty) + "), " + \
+                  "Change the board sizes (" + str(Board.no_lines) + "x" + str(Board.no_columns) + "), " + \
+                  "Choose the game type (Pv" + ("P" if Game.pvp else "E") + "), " + \
+                  "Toggle GUI (" + ("On" if Game.gui else "Off") + "), " + \
+                  "Quit"
+
+        try:
+            option = input_handler.get_valid_input(Game.logo() + "\n\n< Choose an option >", options)
+
+            if option == '0':
                 Game.quit(True)
             else:
                 if option == '1':
@@ -313,23 +374,19 @@ class Game:
                     Game.change_difficulty()
                 elif option == '4':
                     Game.change_game_board_sizes()
-
-                    if Game.gui:
-                        # in case we change the game_board size, we need to reset the width and height of the window
-                        graphics.Graphics.update_width_height(Game.get_instance())
-                    Game.game_board = board.Board()
-
-                    Game.reset()
                 elif option == '5':
-                    Game.pvp = not Game.pvp
+                    Game.toggle_gamemode()
                 elif option == '6':
-                    if not Game.pvp:
-                        Game.change_starting_player()
-                    else:
-                        Game.toggle_gui()
-                elif not Game.pvp and option == '7':
                     Game.toggle_gui()
 
                 Game.main_menu()
         except KeyboardInterrupt:
             Game.quit()
+
+    # Prints the game menu and gets an option from the user
+    @staticmethod
+    def main_menu():
+        if Game.pvp:
+            Game.main_menu_pvp()
+        else:
+            Game.main_menu_pve()

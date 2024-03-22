@@ -1,9 +1,8 @@
-from game_logic import game
+from game_logic.game import Game
 
 
 def main():
-    game_instance = game.Game().get_instance()
-    game_instance.main_menu()
+    Game().main_menu()
 
 if __name__ == "__main__":
     main()

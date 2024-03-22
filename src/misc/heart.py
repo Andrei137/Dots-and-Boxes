@@ -11,7 +11,7 @@ from colorama import Fore, init
 
 class Heart:
     instance = None  # Singleton class
-    message = ["THANK", "  U FOR  ", "PLAYING"]
+    message  = ["THANK", "  U FOR  ", "PLAYING"]
 
     # Singleton class
     @classmethod
