@@ -38,8 +38,8 @@ def get_valid_input(title, text="", board_menu=False):
         return options + "\n\n-> "
 
     if board_menu:
-        options = "[?] Select any number from 3 to 8\n[0] Go back\n\n-> "
-        viable_options = [str(i) for i in range(3, 9)] + ['0']
+        options = "[?] Select any number from 3 to 7\n[0] Go back\n\n-> "
+        viable_options = [str(i) for i in range(3, 8)] + ['0']
     else:
         options = turn_into_options(text)
         viable_options = [s[0] for s in options.split('[') if len(s) > 1 and s[0].isdigit()]
