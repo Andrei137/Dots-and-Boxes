@@ -238,6 +238,9 @@ class Board:
     # Makes a move on the board, marking both boxes and checking for completed boxes
     # For the GUI -> If the move was already made, returns False to keep the player's turn
     def make_move(self, i, j, direction):
+        if not self.valid_position(i, j):
+            return False
+
         self.completed_box = False
 
         if "right".startswith(direction):
@@ -294,6 +297,9 @@ class Board:
 
     # Undoes a move on the board, keeping the score accurate
     def undo_move(self, i, j, direction):
+        if not self.valid_position(i, j):
+            return
+
         if "right".startswith(direction):
             self.undo_box_completed(i, j)
             self.boxes[i][j].up = False

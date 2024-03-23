@@ -1,3 +1,2 @@
 Match 1
-Player - Computer: 0 - 1
-Time: 16.70 seconds
+Aborted
