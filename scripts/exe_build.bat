@@ -1,5 +1,7 @@
 @echo off
 
+cd ..
+
 REM Check if PyInstaller is installed
 pyinstaller --version >nul 2>&1
 if not %errorlevel% equ 0 (

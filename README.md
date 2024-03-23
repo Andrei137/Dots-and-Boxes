@@ -40,8 +40,9 @@
 | (7, m) |    6   |   4    |   4    |   3    |   3    |   2    |
 
 
-## Creare exe
+## Build exe
 ```bash
+cd scripts
 exe_build.bat
 ```
 
@@ -51,14 +52,16 @@ sau
 pyinstaller main.spec
 ```
 
-## Rulare
+## Run
 #### Python (fara exe)
 ```bash
+cd scripts
 run.bat
 ```
 
-#### Cu exe
+#### Cu exe (necesita build)
 ```bash
+cd scripts
 exe_run.bat
 ```
 

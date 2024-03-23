@@ -1,5 +1,7 @@
 @echo off
 
+cd ..
+
 REM Check if Pygame is installed
 python -c "import pygame" >nul 2>&1
 if not %errorlevel% equ 0 (

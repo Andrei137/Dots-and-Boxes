@@ -69,6 +69,7 @@ class Game:
         input_handler.clear_screen()
         if print_heart:
             heart.Heart().print_full_heart()
+            time.sleep(0.75)
         exit(0)
 
     # Returns a string with the current player
