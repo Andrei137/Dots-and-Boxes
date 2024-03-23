@@ -61,6 +61,6 @@ class Box:
                 return "right"
         return False
 
-    # returns True if the box is completed
+    # Returns True if the box is completed
     def completed(self):
         return self.up and self.down and self.left and self.right

@@ -1,5 +1,6 @@
+import sys
 from time import sleep
-from os import environ
+from os import environ, path
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable Hello message from pygame
 import pygame
 
@@ -14,11 +15,17 @@ class Graphics:
     scale      = 2
     grey       = (128, 128, 128)
 
+    # Resource directory path
+    if getattr(sys, 'frozen', False):  # if the application is bundled by PyInstaller
+        resource_dir = path.join(sys._MEIPASS, 'resources')
+    else:
+        resource_dir = path.join(path.dirname(__file__), '..', '..', 'resources')
+
     # Images
-    line_image = pygame.image.load("resources\\Line.png")
-    dot_image  = pygame.image.load("resources\\Dot.png")
-    x_image    = pygame.image.load("resources\\X.png")
-    o_image    = pygame.image.load("resources\\O.png")
+    line_image = pygame.image.load(path.join(resource_dir, 'Line.png'))
+    dot_image  = pygame.image.load(path.join(resource_dir, 'Dot.png'))
+    x_image    = pygame.image.load(path.join(resource_dir, 'X.png'))
+    o_image    = pygame.image.load(path.join(resource_dir, 'O.png'))
 
     # Singleton class
     @classmethod

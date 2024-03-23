@@ -89,7 +89,7 @@ class Alpha_Beta:
             return min_value, best_move
 
     @staticmethod
-    def get_move(game_board, depth=5):
+    def get_move(game_board, depth):
         board = game_board
 
         alpha = -board.limit - board.get_total_points() - 1

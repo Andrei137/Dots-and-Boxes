@@ -1,4 +1,6 @@
+import sys
 import time
+from os import path
 from .board import Board
 from gui.graphics import Graphics
 from ai.alpha_beta import Alpha_Beta
@@ -12,12 +14,31 @@ class Game:
     # The game board
     game_board = Board()
 
+    # For logs
+    if getattr(sys, 'frozen', False):  # if the application is bundled by PyInstaller
+        log_dir = path.join(sys._MEIPASS, 'logs')
+    else:
+        log_dir = path.join(path.dirname(__file__), '..', '..', 'logs')
+
+    match_number = 1
+
     # Settings
     algorithm     = Algorithm.ALPHA_BETA  # Algorithm enum
     difficulty    = Difficulty.MEDIUM  # Difficulty enum
     player_symbol = Board.max_symbol  # max first, min second
     pvp           = False  # PvP or PvE
     gui           = True  # GUI or CLI
+
+    depths = {
+    #   (n, 2)      (n, 3)      (n, 4)      (n, 5)     (n, 6)     (n, 7)
+        (2, 2):  0, (2, 3):  7, (2, 4): 10, (2, 5): 7, (2, 6): 6, (2, 7): 6,  # (2, m)
+        (3, 2):  7, (3, 3):  7, (3, 4):  6, (3, 5): 5, (3, 6): 5, (3, 7): 4,  # (3, m)
+        (4, 2): 10, (4, 3):  6, (4, 4):  5, (4, 5): 5, (4, 6): 4, (4, 7): 4,  # (4, m)
+        (5, 2):  7, (5, 3):  5, (5, 4):  5, (5, 5): 4, (5, 6): 4, (5, 7): 3,  # (5, m)
+        (6, 2):  6, (6, 3):  5, (6, 4):  4, (6, 5): 4, (6, 6): 3, (6, 7): 3,  # (6, m)
+        (7, 2):  6, (7, 3):  4, (7, 4):  4, (7, 5): 3, (7, 6): 3, (7, 7): 2,  # (7, m)
+    }
+
 
     # Singleton class
     @classmethod
@@ -55,18 +76,71 @@ class Game:
     def print_current_player():
         if Game.pvp:
             # if the game mode is PvP, print player X or player O
-            print(f"Current player: {Game.game_board.current_player}", end="\n\n")
+            print(f"\nCurrent player: {Game.game_board.current_player}", end="\n\n")
         else:
             # if the game mode is PvE, return the player or the computer
             if Game.game_board.current_player == Game.player_symbol:
-                print(f"Player's turn")
+                print(f"\nPlayer's turn")
             else:
-                print("Computer is thinking", end='')
+                print("\nComputer is thinking", end='')
 
                 # Loading effect
                 for _ in range(3):
                     print(".", end='', flush=True)
                     time.sleep(0.25)
+
+    # Quits the match
+    @staticmethod
+    def quit_match(graphics=True):
+        if graphics:
+            Graphics().quit_graphics()
+
+        # mark the match aborted in the logs
+        with open(path.join(Game.log_dir, 'time.txt'), 'a') as f:
+            f.write("Aborted\n")
+
+        with open(path.join(Game.log_dir, 'match_history.txt'), 'a') as f:
+            f.write("Aborted\n")
+
+        Game.reset()
+        Game.main_menu()
+
+    # Prints the score of the game
+    @staticmethod
+    def print_score():
+        board = Game.game_board
+
+        if Game.pvp:
+            if board.max_score == 1:
+                print(f"Player {Board.max_symbol}: 1 point")
+            else:
+                print(f"Player {Board.max_symbol}: " + str(board.max_score) + " points")
+            if board.min_score == 1:
+                print(f"Player {Board.min_symbol}: 1 point", end="\n\n")
+            else:
+                print(f"Player {Board.min_symbol}: " + str(board.min_score) + " points", end="\n\n")
+        else:
+            player_score    = board.max_score if Game.player_symbol == Board.max_symbol else board.min_score
+            computer_score  = board.min_score if Game.player_symbol == Board.max_symbol else board.max_score
+            computer_symbol = Board.min_symbol if Game.player_symbol == Board.max_symbol else Board.max_symbol
+
+            if player_score == 1:
+                player = f"Player   ({Game.player_symbol}): 1 point"
+            else:
+                player = f"Player   ({Game.player_symbol}): {player_score} points"
+
+            if computer_score == 1:
+                computer = f"Computer ({computer_symbol}): 1 point"
+            else:
+                computer = f"Computer ({computer_symbol}): {computer_score} points"
+
+            # If the player is MAX, print the player's score first
+            if Game.player_symbol == Board.max_symbol:
+                print(player)
+                print(computer, end="\n\n")
+            else:
+                print(computer)
+                print(player, end="\n\n")
 
     # Gets a point position from the user
     @staticmethod
@@ -82,8 +156,7 @@ class Game:
 
             # go back to main menu
             if position == '0':
-                Game.reset()
-                Game.main_menu()
+                Game.quit_match(False)
             else:
                 i, j = position.split('-')
                 if not i.isdigit() or not j.isdigit() or not Game.game_board.valid_position(int(i) - 1, int(j) - 1):
@@ -137,25 +210,50 @@ class Game:
             except (KeyboardInterrupt, EOFError):
                 Game.quit()
 
+    # Writes the result of the match in the logs
+    @staticmethod
+    def write_result(result, time):
+        with open(path.join(Game.log_dir, 'match_history.txt'), 'a') as f:
+            if Game.pvp:
+                f.write(f"Player {Board.max_symbol} - Player {Board.min_symbol}: {result}\n")
+            else:
+                if Game.player_symbol == Board.max_symbol:
+                    f.write(f"Player - Computer: {result}\n")
+                else:
+                    f.write(f"Computer - Player: {result}\n")
+            f.write(f"Time: {time:.2f} seconds\n")
+
     # Prints the final score and the winner, also waits for input to continue
     # For the GUI, that input means quitting the window
     # For the CLI, that input means pressing any key to continue
     @staticmethod
-    def print_result(boxes=[]):
+    def print_result(time, boxes=[]):
         input_handler.clear_screen()
 
         board = Game.game_board
 
-        if not Game.gui:
-            print(Game.get_instance(), end="\n\n")
+        print(Game.get_instance(), end="\n\n")
+        Game.print_score()
 
-        print(f"Player {Board.max_symbol}: " + str(board.max_score) + " points")
-        print(f"Player {Board.min_symbol}: " + str(board.min_score) + " points", end="\n\n")
-
+        # print the winner
         if board.max_score == board.min_score:
             print("It's a tie!")
+            Game.write_result("1/2 - 1/2", time)
         else:
-            print("Player " + (f"{Board.max_symbol}" if board.max_score > board.min_score else f"{Board.min_symbol}") + " won!")
+            if Game.pvp:
+                print("Player " + (f"{Board.max_symbol}" if board.max_score > board.min_score else f"{Board.min_symbol}") + " won!", time)
+                Game.write_result("1 - 0" if board.max_score > board.min_score else "0 - 1", time)
+            else:
+                player_score   = board.max_score if Game.player_symbol == Board.max_symbol else board.min_score
+                computer_score = board.min_score if Game.player_symbol == Board.max_symbol else board.max_score
+
+                print(("Player " if player_score > computer_score else "Computer ") + "won!")
+                if Game.player_symbol == Board.max_symbol:
+                    Game.write_result("1 - 0" if player_score > computer_score else "0 - 1", time)
+                else:
+                    Game.write_result("0 - 1" if player_score > computer_score else "1 - 0", time)
+
+        print(f"\nTime: {time:.2f} seconds")
 
         if Game.gui:
             Graphics().player_click(Game.get_instance(), boxes, True)
@@ -170,31 +268,48 @@ class Game:
     # Starts the game, looping until it's finished
     @staticmethod
     def play():
-        game = Game.get_instance()
-        board = game.game_board
+        game          = Game.get_instance()
+        board         = game.game_board
+        computer_move = 1
 
         if Game.gui:
             boxes = Graphics().start_graphics(game)
 
+        time_start = time.time()
         while not Game.game_board.is_finished():
             input_handler.clear_screen()
+
+            print(Game.get_instance())
             Game.print_current_player()
 
             if not Game.pvp and board.current_player != Game.player_symbol:
                 if Game.algorithm == Algorithm.ALPHA_BETA:
-                    time1 = time.time()
-                    i, j, direction = Alpha_Beta.get_move(game.game_board)
-                    time2 = time.time()
-
-                    
+                    time_ai_start = time.time()
+                    move = Alpha_Beta.get_move(game.game_board, Game.depths[(Board.no_lines, Board.no_columns)])
+                    if move is None:
+                        move = Alpha_Beta.get_move(game.game_board, 1)
+                    i, j, direction = move
+                    time_ai_finish = time.time()
+    
                 board.make_move(i, j, direction)
+
                 if Game.gui:
                     boxes = Graphics().display_game_board(game)
 
-                if abs(time2 - time1) > 0.01:
-                    input_handler.clear_screen()
-                    print(f"Computer thought for {time2 - time1:.2f} seconds")
-                    time.sleep(1)
+                if abs(time_ai_finish - time_ai_start) > 0.01:
+                    with open(path.join(Game.log_dir, 'time.txt'), 'a') as f:
+                        if computer_move < 10:
+                            f.write(f"Move  {computer_move}: {time_ai_finish - time_ai_start} seconds\n")
+                        else:
+                            f.write(f"Move {computer_move}: {time_ai_finish - time_ai_start} seconds\n")
+                        computer_move += 1
+                else:
+                    with open(path.join(Game.log_dir, 'time.txt'), 'a') as f:
+                        if computer_move < 10:
+                            f.write(f"Move  {computer_move}: Instant\n")
+                        else:
+                            f.write(f"Move {computer_move}: Instant\n")
+                        computer_move += 1
             else:
                 if Game.gui:
                     score = 0
@@ -206,9 +321,7 @@ class Game:
                             i, j = Graphics().player_click(game, boxes)
 
                             if i == j and i is None:
-                                Graphics().quit_graphics()
-                                Game.reset()
-                                Game.main_menu()
+                                Game.quit_match()
                             elif not (j & 1):
                                 valid_move = board.make_move(i // 2, j // 2, "down")
                                 boxes = Graphics().display_game_board(game)
@@ -218,9 +331,7 @@ class Game:
 
                             boxes = Graphics().display_game_board(game)
                         except KeyboardInterrupt:
-                            Graphics().quit_graphics()
-                            Game.reset()
-                            Game.main_menu()
+                            Game.quit_match()
                 else:
                     Game.get_coordinates_from_user()
 
@@ -228,9 +339,9 @@ class Game:
                 board.current_player = board.get_opponent()
 
         if Game.gui:
-            Game.print_result(boxes)
+            Game.print_result(time.time() - time_start, boxes)
         else:
-            Game.print_result()
+            Game.print_result(time.time() - time_start)
 
         Game.reset()
 
@@ -295,6 +406,7 @@ class Game:
         except KeyboardInterrupt:
             Game.quit()
 
+    # Toggles the game mode
     @staticmethod
     def toggle_gamemode():
         Game.pvp = not Game.pvp
@@ -323,9 +435,38 @@ class Game:
                "| |__| | (_) | |_\\__ \\ | (_>  < | |_) | (_) >  <  __/\\__ \\   \n" + \
                "|_____/ \\___/ \\__|___/  \\___/\\/ |____/ \\___/_/\\_\\___||___/\n"
 
+    # Writes the match number in the logs
+    @staticmethod
+    def write_match_number(file_name):
+        with open(path.join(Game.log_dir, f"{file_name}.txt"), 'w' if Game.match_number == 1 else 'a') as f:
+            if Game.match_number != 1:
+                f.write("\n")
+            f.write("Match " + str(Game.match_number) + '\n')
+
+    # Prints the logs to the screen
+    @staticmethod
+    def write_file(file_name):
+        input_handler.clear_screen()
+
+        if Game.match_number != 1:
+            with open(path.join(Game.log_dir, f"{file_name}.txt"), 'r') as f:
+                print(f.read())
+            try:
+                _ = input("\nPress any key to continue...")
+            except KeyboardInterrupt:
+                Game.quit()
+        else:
+            print("No matches played yet")
+            try:
+                _ = input("\nPress any key to continue...")
+            except KeyboardInterrupt:
+                Game.quit()
+
+    # The main menu for the PvP game mode
     @staticmethod
     def main_menu_pvp():
         options = "Start game, " + \
+                  "See match history, " + \
                   "Change the board sizes (" + str(Board.no_lines) + "x" + str(Board.no_columns) + "), " + \
                   "Choose the game type (Pv" + ("P" if Game.pvp else "E") + "), " + \
                   "Toggle GUI (" + ("On" if Game.gui else "Off") + "), " + \
@@ -338,26 +479,36 @@ class Game:
                 Game.quit(True)
             else:
                 if option == '1':
+                    Game.write_match_number("time")
+                    Game.write_match_number("match_history")
+                    Game.match_number += 1
+
                     Game.play()
                 elif option == '2':
-                    Game.change_game_board_sizes()
+                    Game.write_file("match_history")
                 elif option == '3':
-                    Game.toggle_gamemode()
+                    Game.change_game_board_sizes()
                 elif option == '4':
+                    Game.toggle_gamemode()
+                elif option == '5':
                     Game.toggle_gui()
 
                 Game.main_menu()
         except KeyboardInterrupt:
             Game.quit()
 
+    # The main menu for the PvE game mode
     @staticmethod
     def main_menu_pve():
         options = "Start game, " + \
-                  "Change the computer's algorithm (" + str(Game.algorithm) + "), " + \
-                  "Change difficulty (" + str(Game.difficulty) + "), " + \
+                  "See match history, " + \
                   "Change the board sizes (" + str(Board.no_lines) + "x" + str(Board.no_columns) + "), " + \
                   "Choose the game type (Pv" + ("P" if Game.pvp else "E") + "), " + \
                   "Toggle GUI (" + ("On" if Game.gui else "Off") + "), " + \
+                  "Change the computer's algorithm (" + str(Game.algorithm) + "), " + \
+                  "Change difficulty (" + str(Game.difficulty) + "), " + \
+                  "Change who starts first (" + ("Player" if Game.player_symbol == Board.max_symbol else "Computer") + "), " + \
+                  "See time logs, " + \
                   "Quit"
 
         try:
@@ -367,17 +518,27 @@ class Game:
                 Game.quit(True)
             else:
                 if option == '1':
+                    Game.write_match_number("time")
+                    Game.write_match_number("match_history")
+                    Game.match_number += 1
+
                     Game.play()
                 elif option == '2':
-                    Game.change_algorithm()
+                    Game.write_file("match_history")
                 elif option == '3':
-                    Game.change_difficulty()
-                elif option == '4':
                     Game.change_game_board_sizes()
-                elif option == '5':
+                elif option == '4':
                     Game.toggle_gamemode()
-                elif option == '6':
+                elif option == '5':
                     Game.toggle_gui()
+                elif option == '6':
+                    Game.change_algorithm()
+                elif option == '7':
+                    Game.change_difficulty()
+                elif option == '8':
+                    Game.switch_starting_player()
+                elif option == '9':
+                    Game.write_file("time")
 
                 Game.main_menu()
         except KeyboardInterrupt:
