@@ -1,2 +1,27 @@
 Match 1
-Aborted
+Move  1: 0.4224073886871338 seconds
+Move  2: 4.379502534866333 seconds
+Move  3: 0.30872392654418945 seconds
+Move  4: 0.832524299621582 seconds
+Move  5: 1.0597598552703857 seconds
+Move  6: 0.9605503082275391 seconds
+Move  7: 0.4999053478240967 seconds
+Move  8: 0.036768198013305664 seconds
+Move  9: Instant
+Move 10: Instant
+Move 11: Instant
+Move 12: Instant
+Move 13: Instant
+Move 14: Instant
+
+Match 2
+Move  1: Instant
+Move  2: Instant
+Move  3: Instant
+Move  4: Instant
+
+Match 3
+Move  1: Instant
+Move  2: Instant
+Move  3: Instant
+Move  4: Instant

@@ -2,9 +2,9 @@ import sys
 import time
 from os import path
 from .board import Board
-from gui.graphics import Graphics
-from ai.alpha_beta import Alpha_Beta
-from misc import input_handler, heart, Algorithm, Difficulty
+from src.gui.graphics import Graphics
+from src.ai.alpha_beta import Alpha_Beta
+from src.misc import input_handler, heart, Algorithm, Difficulty
 
 
 class Game:

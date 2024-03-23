@@ -1,2 +1,11 @@
 Match 1
-Aborted
+Player - Computer: 0 - 1
+Time: 30.18 seconds
+
+Match 2
+Player - Computer: 0 - 1
+Time: 11.26 seconds
+
+Match 3
+Computer - Player: 1/2 - 1/2
+Time: 11.23 seconds
