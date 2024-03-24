@@ -20,6 +20,9 @@ class Board:
         self.completed_box  = False  # Keeps turn if True
         self.current_player = Board.max_symbol
 
+    def __eq__(self, other):
+        return self.boxes == other.boxes
+
     # The actual board representation
     def __str__(self):
         boxes_str = ''
@@ -48,14 +51,15 @@ class Board:
 
     # Bitset representation of the board
     def __repr__(self):
-        boxes_repr = '\n\t[up-down-left-right]\n\n\t'
-        for i in range(Board.no_lines):
-            for j in range(Board.no_columns):
-                boxes_repr += repr(self.boxes[i][j])
-            if i != Board.no_lines - 1:
-                boxes_repr += '\n\t'
+        boxes_repr = "\n\t"
+        for i in range(Board.no_lines - 1):
+            boxes_repr += '['
+            for j in range(Board.no_columns - 1):
+                boxes_repr += repr(self.boxes[i][j]) + ']' + ('[' if j != Board.no_columns - 2 else '')
+            if i != Board.no_lines - 2:
+                boxes_repr += "\n\t"
             else:
-                boxes_repr += '\n'
+                boxes_repr += "\n"
         return boxes_repr
 
     # Translates the box (i, j) into the point (i, j) given a position
@@ -83,14 +87,18 @@ class Board:
     def valid_position(i, j):
         return 0 <= i < Board.no_lines and 0 <= j < Board.no_columns
 
-    # Returns the total points of the game
-    @staticmethod
-    def get_total_points():
-        return (Board.no_lines - 1) * (Board.no_columns - 1)
-
     # Returns True if the game is finished
     def is_finished(self):
-        return self.max_score + self.min_score == Board.get_total_points()
+        return self.max_score + self.min_score == Board.get_total_score()
+
+    # Returns the total score of the game
+    @staticmethod
+    def get_total_score():
+        return (Board.no_lines - 1) * (Board.no_columns - 1)
+
+    # Returns the score of the current player
+    def get_player_score(self, player_symbol):
+        return self.max_score if player_symbol == Board.max_symbol else self.min_score
 
     # Finds the symbol of the other player
     def get_opponent(self):
@@ -144,15 +152,15 @@ class Board:
         #                       the uncompleted ones
         # in other words, the score is the total score - the other player's score
         if current_player == self.max_symbol:
-            return Board.get_total_points() - self.min_score
+            return Board.get_total_score() - self.min_score
         else:
-            return Board.get_total_points() - self.max_score
+            return Board.get_total_score() - self.max_score
 
     # Estimate for the medium and hard AI
     def good_score(self, current_player):
         # the score is equal to the number of the boxes the current_player completed +
         #                       the number of boxes the current player can complete
-        # in other words, it's the maximum points reachable by the current player in a simulation
+        # in other words, it's the maximum score reachable by the current player in a simulation
 
         moves = []
 
@@ -187,7 +195,7 @@ class Board:
 
     # Estimate for minimax
     def estimate_score(self, difficulty):
-        if self.max_score + self.min_score == Board.get_total_points():
+        if self.max_score + self.min_score == Board.get_total_score():
             if self.max_score == self.min_score:
                 return 0
             elif self.max_score > self.min_score:

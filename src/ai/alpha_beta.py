@@ -1,11 +1,5 @@
 class Alpha_Beta:
-    difficulty = ' '
-
-    @staticmethod
-    def set_difficulty(difficulty):
-        # sets te difficulty for the alpha-beta algorithm
-        # it is a string in title format
-        Alpha_Beta.difficulty = difficulty
+    difficulty = "Medium"
 
     @staticmethod
     def alpha_beta(board, depth, alpha, beta, maximizing_player):
@@ -92,7 +86,7 @@ class Alpha_Beta:
     def get_move(game_board, depth):
         board = game_board
 
-        alpha = -board.limit - board.get_total_points() - 1
-        beta = board.limit + board.get_total_points() + 1
+        alpha = -board.limit - board.get_total_score() - 1
+        beta = board.limit + board.get_total_score() + 1
 
         return Alpha_Beta.alpha_beta(board, depth, alpha, beta, board.current_player == board.max_symbol)[1]

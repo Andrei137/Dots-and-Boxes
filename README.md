@@ -14,7 +14,7 @@
 - [x] Generarea succesorilor. Testarea validitatii mutarilor
 - [x] Testarea starii finale. Stabilirea castigatorului. Calcularea scorului
 - [x] 2 moduri diferite de estimare a scorului pentru stari intermediare
-- [ ] Stabilirea urmatoarei mutari conform algoritmului IDA*  
+- [x] Stabilirea urmatoarei mutari conform algoritmului IDA*  
 - [x] Stabilirea urmatoarei mutari conform algoritmului Alpha-Beta  
 - [ ] Stabilirea urmatoarei mutari folosind retele Bayesiene
 - [x] Claritatea codului
@@ -29,7 +29,7 @@
 - [x] Interfata grafica
 
 
-## Adancimi cu timp rezonabil obtinute
+## Adancimi obtine cu timp de raspuns rezonabil
 |  Size  | (n, 2) | (n, 3) | (n, 4) | (n, 5) | (n, 6) | (n, 7) |
 | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
 | (2, m) |    -   |   7    |   10   |   7    |   6    |   6    |
@@ -40,7 +40,7 @@
 | (7, m) |    6   |   4    |   4    |   3    |   3    |   2    |
 
 
-## Build exe
+## Build
 ```bash
 cd scripts
 exe_build.bat
@@ -53,13 +53,13 @@ pyinstaller main.spec
 ```
 
 ## Run
-#### Python (fara exe)
+#### Python (no exe)
 ```bash
 cd scripts
 run.bat
 ```
 
-#### Cu exe (necesita build)
+#### Exe (build required)
 ```bash
 cd scripts
 exe_run.bat

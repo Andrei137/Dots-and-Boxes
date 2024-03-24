@@ -14,7 +14,11 @@ class Box:
 
     # Returns a bitset representation of the box
     def __repr__(self):
-        return '[' + str(int(self.up)) + str(int(self.down)) + str(int(self.left)) + str(int(self.right)) + ']'
+        return str(int(self.up)) + '-' + \
+               str(int(self.down)) + '-' + \
+               str(int(self.left)) + '-' + \
+               str(int(self.right)) + '-' + \
+               (self.symbol if self.symbol != ' ' else 'E')
 
     def __eq__(self, other):
         return self.up == other.up and \

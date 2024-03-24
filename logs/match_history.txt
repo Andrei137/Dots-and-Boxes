@@ -1,11 +1,55 @@
 Match 1
-Player - Computer: 0 - 1
-Time: 30.18 seconds
+Players   : Player - Computer
+Result    : 0 - 1
+Algorithm : Alpha Beta
+Difficulty: Medium
+Board size: 2x3
+Duration  : 11.90 seconds
 
 Match 2
-Player - Computer: 0 - 1
-Time: 11.26 seconds
+Players   : Player - Computer
+Result    : 1/2 - 1/2
+Algorithm : IDA*
+Difficulty: Medium
+Board size: 2x3
+Duration  : 12.29 seconds
 
 Match 3
-Computer - Player: 1/2 - 1/2
-Time: 11.23 seconds
+Players   : Computer - Player
+Result    : 1 - 0
+Algorithm : IDA*
+Difficulty: Medium
+Board size: 2x3
+Duration  : 8.46 seconds
+
+Match 4
+Players   : Computer - Player
+Result    : 1 - 0
+Algorithm : IDA*
+Difficulty: Medium
+Board size: 3x3
+Duration  : 16.62 seconds
+
+Match 5
+Players   : Player - Computer
+Result    : 1/2 - 1/2
+Algorithm : IDA*
+Difficulty: Medium
+Board size: 3x3
+Duration  : 22.41 seconds
+
+Match 6
+Players   : Player - Computer
+Result    : 1 - 0
+Algorithm : IDA*
+Difficulty: Medium
+Board size: 3x3
+Duration  : 13.19 seconds
+
+Match 7
+Players   : Player - Computer
+Result    : 1/2 - 1/2
+Algorithm : IDA*
+Difficulty: Medium
+Board size: 5x5
+Duration  : 60.49 seconds

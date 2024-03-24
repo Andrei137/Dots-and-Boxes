@@ -2,9 +2,10 @@ import sys
 import time
 from os import path
 from .board import Board
-from src.gui.graphics import Graphics
-from src.ai.alpha_beta import Alpha_Beta
-from src.misc import input_handler, heart, Algorithm, Difficulty
+from ..gui.graphics import Graphics
+from ..ai.alpha_beta import Alpha_Beta
+from ..ai.ida_star import Ida_Star
+from ..misc import input_handler, heart, Algorithm, Difficulty
 
 
 class Game:
@@ -69,8 +70,8 @@ class Game:
         input_handler.clear_screen()
         if print_heart:
             heart.Heart().print_full_heart()
-            time.sleep(0.75)
-        exit(0)
+            time.sleep(0.25)
+        sys.exit(0)
 
     # Returns a string with the current player
     @staticmethod
@@ -211,18 +212,101 @@ class Game:
             except (KeyboardInterrupt, EOFError):
                 Game.quit()
 
+    @staticmethod
+    def get_gui_move_from_user(boxes):
+        game       = Game.get_instance()
+        board      = Game.game_board
+        valid_move = False
+
+        while not valid_move:
+            try:
+                i, j = Graphics().player_click(game, boxes)
+
+                if i == j and i is None:
+                    Game.quit_match()
+                elif not (j & 1):
+                    valid_move = board.make_move(i // 2, j // 2, "down")
+                    boxes = Graphics().display_game_board(game)
+                else:
+                    valid_move = board.make_move(i // 2, j // 2, "right")
+                    boxes = Graphics().display_game_board(game)
+
+                boxes = Graphics().display_game_board(game)
+            except KeyboardInterrupt:
+                Game.quit_match()
+        return boxes
+
+    @staticmethod
+    def computer_move(computer_move_count):
+        board      = Game.game_board
+        time_start = time.time()
+
+        if Game.algorithm == Algorithm.IDA_STAR:
+            board.boxes = Ida_Star.get_move(board, Game.depths[(Board.no_lines, Board.no_columns)])
+
+            # count computer's mew score
+            computer_score = 0
+            for i in range(Board.no_lines - 1):
+                for j in range(Board.no_columns - 1):
+                    if board.boxes[i][j].symbol == Ida_Star.computer_symbol:
+                        computer_score += 1
+
+            # if it is bigger than the previous score, then the computer has completed a box
+            if computer_score > board.get_player_score(Ida_Star.computer_symbol):
+                board.completed_box = True
+                if Ida_Star.computer_symbol == Board.max_symbol:
+                    board.max_score = computer_score
+                else:
+                    board.min_score = computer_score
+            else:
+                board.completed_box = False
+
+        elif Game.algorithm == Algorithm.ALPHA_BETA:
+            move = Alpha_Beta.get_move(board, Game.depths[(Board.no_lines, Board.no_columns)])
+
+            if move is None:
+                move = Alpha_Beta.get_move(board, 1)
+
+            i, j, direction = move
+
+            board.make_move(i, j, direction)
+
+        timer = time.time() - time_start
+
+        if abs(timer) > 0.01:
+            with open(path.join(Game.log_dir, 'time.txt'), 'a') as f:
+                if computer_move_count < 10:
+                    f.write(f"Move  {computer_move_count}: {timer} seconds\n")
+                else:
+                    f.write(f"Move {computer_move_count}: {timer} seconds\n")
+                computer_move_count += 2
+        else:
+            with open(path.join(Game.log_dir, 'time.txt'), 'a') as f:
+                if computer_move_count < 10:
+                    f.write(f"Move  {computer_move_count}: Instant\n")
+                else:
+                    f.write(f"Move {computer_move_count}: Instant\n")
+                computer_move_count += 2
+        return computer_move_count
+
     # Writes the result of the match in the logs
     @staticmethod
     def write_result(result, time):
         with open(path.join(Game.log_dir, 'match_history.txt'), 'a') as f:
             if Game.pvp:
-                f.write(f"Player {Board.max_symbol} - Player {Board.min_symbol}: {result}\n")
+                f.write(f"Players   : Player {Board.max_symbol} - Player {Board.min_symbol}\n")
+                f.write(f"Result    : {result}\n")
             else:
                 if Game.player_symbol == Board.max_symbol:
-                    f.write(f"Player - Computer: {result}\n")
+                    f.write(f"Players   : Player - Computer\n")
                 else:
-                    f.write(f"Computer - Player: {result}\n")
-            f.write(f"Time: {time:.2f} seconds\n")
+                    f.write(f"Players   : Computer - Player\n")
+                f.write(f"Result    : {result}\n")
+                f.write(f"Algorithm : {Game.algorithm}\n")
+                f.write(f"Difficulty: {Game.difficulty}\n")
+
+            f.write(f"Board size: {Board.no_lines}x{Board.no_columns}\n")
+            f.write(f"Duration  : {time:.2f} seconds\n")
 
     # Prints the final score and the winner, also waits for input to continue
     # For the GUI, that input means quitting the window
@@ -269,70 +353,29 @@ class Game:
     # Starts the game, looping until it's finished
     @staticmethod
     def play():
-        game          = Game.get_instance()
-        board         = game.game_board
-        computer_move = 1
+        game                = Game.get_instance()
+        board               = Game.game_board
+        computer_move_count = (1 if Game.player_symbol == Board.min_symbol else 2)
 
         if Game.gui:
             boxes = Graphics().start_graphics(game)
 
         time_start = time.time()
-        while not Game.game_board.is_finished():
+        while not board.is_finished():
             input_handler.clear_screen()
 
             print(Game.get_instance())
+
             Game.print_current_player()
 
             if not Game.pvp and board.current_player != Game.player_symbol:
-                if Game.algorithm == Algorithm.ALPHA_BETA:
-                    time_ai_start = time.time()
-                    move = Alpha_Beta.get_move(game.game_board, Game.depths[(Board.no_lines, Board.no_columns)])
-                    if move is None:
-                        move = Alpha_Beta.get_move(game.game_board, 1)
-                    i, j, direction = move
-                    time_ai_finish = time.time()
-    
-                board.make_move(i, j, direction)
+                computer_move_count = Game.computer_move(computer_move_count)
 
                 if Game.gui:
                     boxes = Graphics().display_game_board(game)
-
-                if abs(time_ai_finish - time_ai_start) > 0.01:
-                    with open(path.join(Game.log_dir, 'time.txt'), 'a') as f:
-                        if computer_move < 10:
-                            f.write(f"Move  {computer_move}: {time_ai_finish - time_ai_start} seconds\n")
-                        else:
-                            f.write(f"Move {computer_move}: {time_ai_finish - time_ai_start} seconds\n")
-                        computer_move += 1
-                else:
-                    with open(path.join(Game.log_dir, 'time.txt'), 'a') as f:
-                        if computer_move < 10:
-                            f.write(f"Move  {computer_move}: Instant\n")
-                        else:
-                            f.write(f"Move {computer_move}: Instant\n")
-                        computer_move += 1
             else:
                 if Game.gui:
-                    score = 0
-
-                    valid_move = False
-
-                    while not valid_move:
-                        try:
-                            i, j = Graphics().player_click(game, boxes)
-
-                            if i == j and i is None:
-                                Game.quit_match()
-                            elif not (j & 1):
-                                valid_move = board.make_move(i // 2, j // 2, "down")
-                                boxes = Graphics().display_game_board(game)
-                            else:
-                                valid_move = board.make_move(i // 2, j // 2, "right")
-                                boxes = Graphics().display_game_board(game)
-
-                            boxes = Graphics().display_game_board(game)
-                        except KeyboardInterrupt:
-                            Game.quit_match()
+                    boxes = Game.get_gui_move_from_user(boxes)
                 else:
                     Game.get_coordinates_from_user()
 
@@ -375,7 +418,8 @@ class Game:
 
             if option != '0':
                 Game.difficulty = Difficulty.select_difficulty(option)
-                Alpha_Beta.set_difficulty(str(Game.difficulty))
+                Alpha_Beta.difficulty = str(Game.difficulty)
+                Ida_Star.difficulty = str(Game.difficulty)
         except KeyboardInterrupt:
             Game.quit()
 
@@ -415,6 +459,7 @@ class Game:
     # Changes the starting player
     @staticmethod
     def switch_starting_player():
+        Ida_Star.computer_symbol = Game.player_symbol
         Game.player_symbol = Board.min_symbol if Game.player_symbol == Board.max_symbol else Board.max_symbol
 
     # Toggles the GUI
@@ -481,9 +526,12 @@ class Game:
             else:
                 if option == '1':
                     Game.write_match_number("time")
+                    with open(path.join(Game.log_dir, 'time.txt'), 'a') as f:
+                        f.write("Player - Player\n")
+
                     Game.write_match_number("match_history")
                     Game.match_number += 1
-
+                    
                     Game.play()
                 elif option == '2':
                     Game.write_file("match_history")
@@ -509,7 +557,7 @@ class Game:
                   "Change the computer's algorithm (" + str(Game.algorithm) + "), " + \
                   "Change difficulty (" + str(Game.difficulty) + "), " + \
                   "Change who starts first (" + ("Player" if Game.player_symbol == Board.max_symbol else "Computer") + "), " + \
-                  "See time logs, " + \
+                  "See computer time logs, " + \
                   "Quit"
 
         try:

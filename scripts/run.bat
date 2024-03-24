@@ -14,4 +14,4 @@ if not %errorlevel% equ 0 (
     )
 )
 
-python src/main.py
+py main.py
