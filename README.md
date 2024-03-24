@@ -1,7 +1,6 @@
 ## Dots and Boxes
 
 ## Cerinte
-
 - [x] Setup-ul jocului
     - [x] Selectare algoritm (IDA*, Alpha-Beta sau retele bayesiene)
     - [x] Selectare dificultate
@@ -73,8 +72,8 @@ Dots_and_Boxes.exe
 ```
 
 ## Resurse
-
 - [Heart Model](https://github.com/liuyubobobo/heart-curve-cplusplus)
 - [Colorama](https://pypi.org/project/colorama/)
 - [PyGame](https://www.pygame.org/docs/)
 - [PyInstaller](https://www.pyinstaller.org/)
+- [PyTest](https://docs.pytest.org/en/latest/)
