@@ -3,17 +3,23 @@ from copy import deepcopy
 
 class State:
     def __init__(self, board, parent=None, g=0, h=0, successors=[]):
-        self.board      = deepcopy(board)
-        self.parent     = parent
-        self.g          = g
-        self.h          = h
-        self.f          = g + h
+        self.board = deepcopy(board)
+        self.parent = parent
+        self.g = g
+        self.h = h
+        self.f = g + h
         self.successors = successors
 
     def __eq__(self, other):
+        # assert types
+        assert isinstance(other, State), "Wrong parameter type"
+
         return self.board == other.board
 
     def __lt__(self, other):
+        # assert types
+        assert isinstance(other, State), "Wrong parameter type"
+
         if self.f == other.f:
             return self.g < other.g
         return self.f < other.f
@@ -28,7 +34,7 @@ class State:
 
     # The path from the current state to the root
     def path_to_root(self):
-        path  = [self]
+        path = [self]
         state = self
 
         while state.parent is not None:
@@ -43,29 +49,45 @@ class State:
 
     # Calculates the heuristic value of the current state
     def estimate_h(self, computer_symbol):
+        # assert types
+        assert isinstance(computer_symbol, str), "Wrong parameter type"
+
+        # assert values
+        assert computer_symbol in [self.board.max_symbol, self.board.min_symbol], "Wrong parameter"
+
         # get the remaining edges
-        remaining_edges = len(self.board.get_possible_moves())
+        remaining_boxes = len(self.board.get_possible_moves()) / 4
 
         # get the player and opponent scores
-        player_symbol  = self.board.max_symbol if computer_symbol == self.board.min_symbol else self.board.min_symbol
-        player_score   = self.board.get_player_score(player_symbol)
+        player_symbol = self.board.max_symbol if computer_symbol == self.board.min_symbol else self.board.min_symbol
+        player_score = self.board.get_player_score(player_symbol)
         computer_score = self.board.get_player_score(computer_symbol)
+
+        score_difference = computer_score - player_score
 
         if self.board.current_player == computer_symbol:
             # if the computer is the current player
-            # remaining_edges / 4 -> the aproximate number of boxes left
-            # player_score - computer_score -> the difference between the player and the opponent scores, the lower the better
-            # we also subtract the number of boxes that the computer can chain, so the computer prefers that path
-            score = remaining_edges / 4 + player_score - computer_score - self.board.good_score(computer_symbol)
+            # remaining edges / 4 -> the aproximate number of boxes left
+            # player_score - computer_score -> the lower the better
+            # subtract the number of boxes the computer can chain, so the computer prefers that path
+            score = remaining_boxes - score_difference - self.board.good_score(computer_symbol)
         else:
             # if the opponent is the current player
-            # remaining_edges / 4 -> the aproximate number of boxes left
-            # computer_score - player_score -> the difference between the computer and the player scores, the higher the better
-            # we also add the number of boxes that the the player can chain, so the computer avoids that path
-            score = remaining_edges / 4 - player_score + computer_score + self.board.good_score(player_symbol)
+            # remaining edges / 4 -> the aproximate number of boxes left
+            # computer_score - player_score -> the higher the better
+            # add the number of boxes the player can chain, so the computer avoids that path
+            score = remaining_boxes + score_difference + self.board.good_score(player_symbol)
         return score
 
     def find_successors(self, difficulty, computer_symbol):
+        # assert types
+        assert isinstance(difficulty, str), "Wrong parameter type"
+        assert isinstance(computer_symbol, str), "Wrong parameter type"
+
+        # assert values
+        assert difficulty in ["Easy", "Medium", "Hard"], "Wrong parameter"
+        assert computer_symbol in [self.board.max_symbol, self.board.min_symbol], "Wrong parameter"
+
         self.successors = []
         moves = self.board.get_possible_moves()
         for move in moves:

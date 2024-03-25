@@ -1,92 +1,14 @@
 Match 1
-Move  2: Instant
-Move  4: Instant
-Move  6: Instant
-Move  8: Instant
-
-Match 2
-Move  2: 0.027583837509155273 seconds
-Move  4: Instant
-Move  6: Instant
-
-Match 3
-Move  1: 0.030849933624267578 seconds
-Move  3: 0.012549877166748047 seconds
-Move  5: Instant
-Move  7: Instant
-
-Match 4
-Move  1: 0.22286391258239746 seconds
-Move  3: 0.2925386428833008 seconds
-Move  5: 0.3822815418243408 seconds
-Move  7: 0.02402949333190918 seconds
-Move  9: 0.018535614013671875 seconds
-Move 11: Instant
-Move 13: Instant
-
-Match 5
-Move  2: 0.318286657333374 seconds
-Move  4: 0.36655497550964355 seconds
-Move  6: 0.13610076904296875 seconds
-Move  8: Instant
-Move 10: Instant
-
-Match 6
-Move  2: 0.3039541244506836 seconds
-Move  4: 0.45081281661987305 seconds
-Move  6: 0.10390567779541016 seconds
-Move  8: Instant
-Move 10: Instant
-
-Match 7
-Move  2: 0.5662176609039307 seconds
-Move  4: 0.5105171203613281 seconds
-Move  6: 0.5376849174499512 seconds
-Move  8: 1.4637172222137451 seconds
-Move 10: 1.9900662899017334 seconds
-Move 12: 2.2882425785064697 seconds
-Move 14: 2.086979389190674 seconds
-Move 16: 1.7475614547729492 seconds
-Move 18: 1.256511926651001 seconds
-Move 20: 0.7465450763702393 seconds
-Move 22: 0.2378838062286377 seconds
-Move 24: 0.19020819664001465 seconds
-Move 26: 0.1527104377746582 seconds
-Move 28: 0.26771020889282227 seconds
-Move 30: 0.17773652076721191 seconds
-Move 32: 0.12669610977172852 seconds
-Move 34: Instant
-Move 36: Instant
-Move 38: Instant
-Move 40: Instant
-Move  0: 0.3446340560913086 seconds
-Move  0: 0.34517884254455566 seconds
-Move  0: 0.32412004470825195 seconds
-Move  0: 2.870429277420044 seconds
-Move  0: 2.484282970428467 seconds
-Move  0: 0.6946189403533936 seconds
-Move  0: 0.6537964344024658 seconds
-Move  0: 5.096338510513306 seconds
-Move  0: 0.3026084899902344 seconds
-Move  0: 1.2989535331726074 seconds
-Move  0: 0.3155841827392578 seconds
-Move  0: 3.6151111125946045 seconds
-Move  0: 0.3035597801208496 seconds
-Move  0: 0.41303133964538574 seconds
-Move  0: 0.3055553436279297 seconds
-Move  0: 3.404296636581421 seconds
-Move  0: 0.30251622200012207 seconds
-Move  0: 3.506465435028076 seconds
-Move  0: 0.30270838737487793 seconds
-Move  0: 3.6295933723449707 seconds
-Move  0: 0.30551791191101074 seconds
-Move  0: 1.9216856956481934 seconds
-Move  0: 0.303494930267334 seconds
-Move  0: 5.569075584411621 seconds
-Move  0: 0.302640438079834 seconds
-Move  0: 6.384915113449097 seconds
-Move  0: 0.32817745208740234 seconds
-Move  0: 2.4455666542053223 seconds
-Move  0: 0.3025195598602295 seconds
-Move  0: 1.1363403797149658 seconds
-Move  0: 0.3052248954772949 seconds
+Move  2: 0.5364766120910645 seconds
+Move  4: 0.5480835437774658 seconds
+Move  6: 0.872455358505249 seconds
+Move  8: 1.9830071926116943 seconds
+Move 10: 1.6569831371307373 seconds
+Move 12: 0.814110517501831 seconds
+Move 14: 0.2895629405975342 seconds
+Move 16: 0.22874760627746582 seconds
+Move 18: 0.021020889282226562 seconds
+Move 20: Instant
+Move 22: Instant
+Move 24: Instant
+Move 26: Instant

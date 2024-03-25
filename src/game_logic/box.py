@@ -1,9 +1,16 @@
 class Box:
     def __init__(self, up=False, down=False, left=False, right=False, symbol=' '):
-        self.up     = up
-        self.down   = down
-        self.left   = left
-        self.right  = right
+        # assert types
+        assert isinstance(up, bool), "Wrong parameter type"
+        assert isinstance(down, bool), "Wrong parameter type"
+        assert isinstance(left, bool), "Wrong parameter type"
+        assert isinstance(right, bool), "Wrong parameter type"
+        assert isinstance(symbol, str), "Wrong parameter type"
+
+        self.up = up
+        self.down = down
+        self.left = left
+        self.right = right
         self.symbol = symbol
 
     def __str__(self):
@@ -21,6 +28,9 @@ class Box:
                (self.symbol if self.symbol != ' ' else 'E')
 
     def __eq__(self, other):
+        # assert types
+        assert isinstance(other, Box), "Wrong parameter type"
+
         return self.up == other.up and \
                self.down == other.down and \
                self.left == other.left and \
@@ -30,6 +40,7 @@ class Box:
     # Returns a list of all uncompleted sides
     def available_moves(self):
         moves = []
+
         if self.up is False:
             moves.append("up")
         if self.down is False:
@@ -41,16 +52,21 @@ class Box:
         return moves
 
     # Returns True if the side is completed
-    def side_completed(self, position):
-        if position == "up":
+    def side_completed(self, direction):
+        # assert types
+        assert isinstance(direction, str), "Wrong parameter type"
+
+        # assert values
+        assert direction in ["up", "down", "left", "right"], "Wrong parameter"
+
+        if direction == "up":
             return self.up
-        if position == "down":
+        if direction == "down":
             return self.down
-        if position == "left":
+        if direction == "left":
             return self.left
-        if position == "right":
+        if direction == "right":
             return self.right
-        return False
 
     # Returns which side is missing if the box is almost completed
     def almost_completed(self):

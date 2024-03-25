@@ -1,23 +1,33 @@
 from copy import deepcopy
 from .state import State
 
+
 class Ida_Star:
-    difficulty      = "Medium"
+    difficulty = "Medium"
     computer_symbol = 'O'
 
     # Checks if the current state is the final state
     @staticmethod
     def final_state(state):
+        # assert types
+        assert isinstance(state, State), "Wrong parameter type"
+
         return state.board.is_finished()
 
     # Gets the successors of the current state
     @staticmethod
     def successors(state):
+        # assert types
+        assert isinstance(state, State), "Wrong parameter type"
+
         return state.find_successors(Ida_Star.difficulty, Ida_Star.computer_symbol)
 
     # Iterative Deepening A* algorithm with depth limit
     @staticmethod
     def ida_star(game_board, depth):
+        # assert types
+        assert isinstance(depth, int), "Wrong parameter type"
+
         def expand(current_state, limit, depth):
             if current_state.f > limit:
                 return current_state, current_state.f, depth
@@ -41,5 +51,8 @@ class Ida_Star:
     # Gets the best move for the computer, returning the first state after the root
     @staticmethod
     def get_move(game_board, depth):
+        # assert types
+        assert isinstance(depth, int), "Wrong parameter type"
+
         best_state = Ida_Star.ida_star(game_board, depth)
         return best_state.path_to_root()[1].board.boxes

@@ -19,7 +19,7 @@
 - [x] Claritatea codului
     - [x] Variabile cu nume intuitive
     - [x] Codul va fi impartit in functii cu nume intuitiv de maxim o pagina fiecare
-    - [ ] Se va trata cazul in care functiile sunt apelate cu parametrii invalizi 
+    - [x] Se va trata cazul in care functiile sunt apelate cu parametrii invalizi 
 - [x] Comentarii
     - [x] Explicarea pe scurt a fiecarei functii
     - [x] Explicarea algoritmului de generare a mutarilor

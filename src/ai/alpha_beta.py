@@ -3,6 +3,12 @@ class Alpha_Beta:
 
     @staticmethod
     def alpha_beta(board, depth, alpha, beta, maximizing_player):
+        # assert types
+        assert isinstance(depth, int), "Wrong parameter type"
+        assert isinstance(alpha, int), "Wrong parameter type"
+        assert isinstance(beta, int), "Wrong parameter type"
+        assert isinstance(maximizing_player, bool), "Wrong parameter type"
+
         # if depth is 0 or the game is finished, return the score of the current board
         if depth == 0 or board.is_finished():
             return board.estimate_score(Alpha_Beta.difficulty), None
@@ -84,9 +90,13 @@ class Alpha_Beta:
 
     @staticmethod
     def get_move(game_board, depth):
+        # assert types
+        assert isinstance(depth, int), "Wrong parameter type"
+
         board = game_board
 
         alpha = -board.limit - board.get_total_score() - 1
         beta = board.limit + board.get_total_score() + 1
+        maximing_player = board.current_player == board.max_symbol
 
-        return Alpha_Beta.alpha_beta(board, depth, alpha, beta, board.current_player == board.max_symbol)[1]
+        return Alpha_Beta.alpha_beta(board, depth, alpha, beta, maximing_player)[1]

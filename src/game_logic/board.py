@@ -5,9 +5,9 @@ from random import shuffle
 class Board:
     # Board details
     no_lines = no_columns = 4  # min 3, max 7
-    max_symbol            = 'X'
-    min_symbol            = 'O'
-    limit                 = 1000
+    max_symbol = 'X'
+    min_symbol = 'O'
+    limit = 1000
 
     def __init__(self, boxes=None):
         if boxes is None:
@@ -15,12 +15,15 @@ class Board:
         else:
             self.boxes = boxes
 
-        self.max_score      = 0
-        self.min_score      = 0
-        self.completed_box  = False  # Keeps turn if True
+        self.max_score = 0
+        self.min_score = 0
+        self.completed_box = False  # Keeps turn if True
         self.current_player = Board.max_symbol
 
     def __eq__(self, other):
+        # assert types
+        assert isinstance(other, Board), "Wrong parameter type"
+
         return self.boxes == other.boxes
 
     # The actual board representation
@@ -55,36 +58,46 @@ class Board:
         for i in range(Board.no_lines - 1):
             boxes_repr += '['
             for j in range(Board.no_columns - 1):
-                boxes_repr += repr(self.boxes[i][j]) + ']' + ('[' if j != Board.no_columns - 2 else '')
+                end = "][" if j != Board.no_columns - 2 else ']'
+                boxes_repr += repr(self.boxes[i][j]) + end
             if i != Board.no_lines - 2:
                 boxes_repr += "\n\t"
             else:
                 boxes_repr += "\n"
         return boxes_repr
 
-    # Translates the box (i, j) into the point (i, j) given a position
+    # Translates the box (i, j) into the point (i, j) given a direction
     # The point (i, j) is the top-left point of the box (i, j)
     @staticmethod
-    def translate_box_into_point(i, j, position):
+    def translate_box_into_point(i, j, direction):
+        # assert types
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+        assert isinstance(direction, str), "Wrong parameter type"
+
+        # assert values
+        assert direction in ["up", "down", "left", "right"], "Wrong parameter"
+
         # box (i, j) up -> point (i, j) right
-        if position == "up":
+        if direction == "up":
             return i, j, "right"
         # box (i, j) down -> point (i + 1, j) right
-        if position == "down":
+        if direction == "down":
             return i + 1, j, "right"
         # box (i, j) left -> point (i, j) down
-        if position == "left":
+        if direction == "left":
             return i, j, "down"
         # box (i, j) right -> point (i, j + 1) down
-        if position == "right":
+        if direction == "right":
             return i, j + 1, "down"
-
-        # wrong position
-        return None
 
     # Returns True if the box position (i, j) is valid
     @staticmethod
     def valid_position(i, j):
+        # assert types
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+
         return 0 <= i < Board.no_lines and 0 <= j < Board.no_columns
 
     # Returns True if the game is finished
@@ -98,6 +111,12 @@ class Board:
 
     # Returns the score of the current player
     def get_player_score(self, player_symbol):
+        # assert types
+        assert isinstance(player_symbol, str), "Wrong parameter type"
+
+        # assert values
+        assert player_symbol in [Board.max_symbol, Board.min_symbol], "Wrong parameter"
+
         return self.max_score if player_symbol == Board.max_symbol else self.min_score
 
     # Finds the symbol of the other player
@@ -106,6 +125,10 @@ class Board:
 
     # Returns all possible moves from the point (i, j)
     def get_direction_options(self, i, j):
+        # assert types
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+
         options = ''
 
         # when going up from the point (i, j), add the left line of the box (i - 1, j)
@@ -148,6 +171,12 @@ class Board:
 
     # Estimate for the easy AI
     def naive_score(self, current_player):
+        # assert types
+        assert isinstance(current_player, str), "Wrong parameter type"
+
+        # assert values
+        assert current_player in [Board.max_symbol, Board.min_symbol], "Wrong parameter"
+
         # the score is equal to the number of the boxes the current_player completed +
         #                       the uncompleted ones
         # in other words, the score is the total score - the other player's score
@@ -158,6 +187,12 @@ class Board:
 
     # Estimate for the medium and hard AI
     def good_score(self, current_player):
+        # assert types
+        assert isinstance(current_player, str), "Wrong parameter type"
+
+        # assert values
+        assert current_player in [Board.max_symbol, Board.min_symbol], "Wrong parameter"
+
         # the score is equal to the number of the boxes the current_player completed +
         #                       the number of boxes the current player can complete
         # in other words, it's the maximum score reachable by the current player in a simulation
@@ -195,6 +230,12 @@ class Board:
 
     # Estimate for minimax
     def estimate_score(self, difficulty):
+        # assert types
+        assert isinstance(difficulty, str), "Wrong parameter type"
+
+        # assert values
+        assert difficulty in ["Easy", "Medium", "Hard"], "Wrong parameter"
+
         if self.max_score + self.min_score == Board.get_total_score():
             if self.max_score == self.min_score:
                 return 0
@@ -223,6 +264,10 @@ class Board:
 
     # Checks if the box (i, j) is completed and updates the score
     def check_box_completed(self, i, j):
+        # assert types
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+
         if self.boxes[i][j].completed():
             self.completed_box = True
             self.boxes[i][j].symbol = self.current_player
@@ -234,6 +279,10 @@ class Board:
 
     # Undoes the completion of the box (i, j) and updates the score
     def undo_box_completed(self, i, j):
+        # assert types
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+
         if self.boxes[i][j].completed():
             self.completed_box = False
             self.boxes[i][j].symbol = ' '
@@ -246,6 +295,14 @@ class Board:
     # Makes a move on the board, marking both boxes and checking for completed boxes
     # For the GUI -> If the move was already made, returns False to keep the player's turn
     def make_move(self, i, j, direction):
+        # assert types
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+        assert isinstance(direction, str), "Wrong parameter type"
+
+        # assert values
+        assert direction in ["up", "down", "left", "right"], "Wrong parameter"
+
         if not self.valid_position(i, j):
             return False
 
@@ -305,6 +362,14 @@ class Board:
 
     # Undoes a move on the board, keeping the score accurate
     def undo_move(self, i, j, direction):
+        # assert types
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+        assert isinstance(direction, str), "Wrong parameter type"
+
+        # assert values
+        assert direction in ["up", "down", "left", "right"], "Wrong parameter"
+
         if not self.valid_position(i, j):
             return
 

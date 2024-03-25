@@ -10,8 +10,11 @@ from colorama import Fore, init
 
 
 class Heart:
-    instance = None  # Singleton class
-    message  = ["THANK", "  U FOR  ", "PLAYING"]
+    # Singleton class
+    instance = None
+
+    # Message inside the heart
+    message = ["THANK", "  U FOR  ", "PLAYING"]
 
     # Singleton class
     @classmethod
@@ -22,8 +25,18 @@ class Heart:
                 init(convert=True)
         return cls.instance
 
+    # Checks if x is inside (value1, value2) or [value1, value2], based on the given sign
     @staticmethod
     def fast_check(x, value1, value2, sign):
+        # assert types
+        assert isinstance(x, float), "Wrong parameter type"
+        assert isinstance(value1, float), "Wrong parameter type"
+        assert isinstance(value2, float), "Wrong parameter type"
+        assert isinstance(sign, str), "Wrong parameter type"
+
+        # assert values
+        assert sign in "|&", "Wrong parameter"
+
         if sign == '|':
             return x <= value1 or x >= value2
         else:
@@ -31,10 +44,18 @@ class Heart:
 
     @staticmethod
     def is_inside_heart(x, y):
+        # assert types
+        assert isinstance(x, float), "Wrong parameter type"
+        assert isinstance(y, float), "Wrong parameter type"
+
         return x * x + math.pow(5.0 * y / 4.0 - math.sqrt(abs(x)), 2) - 1 <= 0.0
 
     @staticmethod
     def print_heart(x, y, condition):
+        # assert types
+        assert isinstance(x, float), "Wrong parameter type"
+        assert isinstance(y, float), "Wrong parameter type"
+        assert isinstance(condition, bool), "Wrong parameter type"
 
         # make the heart red
         print(f"{Fore.RED}", end='')
@@ -46,6 +67,13 @@ class Heart:
 
     @staticmethod
     def print_message(x, y, condition, i, j):
+        # assert types
+        assert isinstance(x, float), "Wrong parameter type"
+        assert isinstance(y, float), "Wrong parameter type"
+        assert isinstance(condition, bool), "Wrong parameter type"
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+
         if Heart.is_inside_heart(x, y):
             if Heart.fast_check(x, -0.33, 0.33, '|'):
                 # red
@@ -64,7 +92,14 @@ class Heart:
         return 0
 
     @staticmethod
-    def for_heart(y, condition):
+    def heart_for(y, condition):
+        # assert types
+        assert isinstance(y, float), "Wrong parameter type"
+        assert isinstance(condition, int), "Wrong parameter type"
+
+        # assert values
+        assert condition in [1, 2], "Wrong parameter"
+
         i = -1.1
 
         while i <= 1.1:
@@ -76,7 +111,14 @@ class Heart:
             i += 0.025
 
     @staticmethod
-    def for_message(y, condition):
+    def message_for(y, condition):
+        # assert types
+        assert isinstance(y, float), "Wrong parameter type"
+        assert isinstance(condition, int), "Wrong parameter type"
+
+        # assert values
+        assert condition in [1, 2, 3], "Wrong parameter"
+
         k = [0, 0, 0]
         i = -1.1
 
@@ -104,15 +146,15 @@ class Heart:
 
         while y >= -0.7:
             if Heart.fast_check(y, 0.5, 0.55, '&'):
-                Heart.for_message(y, 1)
+                Heart.message_for(y, 1)
             elif Heart.fast_check(y, 0.39, 0.45, '&'):
-                Heart.for_message(y, 2)
+                Heart.message_for(y, 2)
             elif Heart.fast_check(y, 0.25, 0.3, '&'):
-                Heart.for_message(y, 3)
+                Heart.message_for(y, 3)
             elif Heart.fast_check(y, 0.2, 0.6, '&'):
-                Heart.for_heart(y, 1)
+                Heart.heart_for(y, 1)
             else:
-                Heart.for_heart(y, 2)
+                Heart.heart_for(y, 2)
             print()
             y -= 0.06
 

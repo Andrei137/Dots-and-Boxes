@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class Algorithm(Enum):
-    IDA_STAR         = 1
-    ALPHA_BETA       = 2
+    IDA_STAR = 1
+    ALPHA_BETA = 2
     BAYESIAN_NETWORK = 3
 
     def __str__(self):
@@ -15,20 +15,24 @@ class Algorithm(Enum):
     # Returns the chosen algorithm
     @staticmethod
     def select_algorithm(option):
+        # assert types
+        assert isinstance(option, str), "Wrong parameter type"
+
+        # assert values
+        assert option in "123", "Wrong parameter"
+
         if option == '1':
             return Algorithm.IDA_STAR
         elif option == '2':
             return Algorithm.ALPHA_BETA
-        elif option == '3':
-            return Algorithm.BAYESIAN_NETWORK
         else:
-            return None
+            return Algorithm.BAYESIAN_NETWORK
 
 
 class Difficulty(Enum):
-    EASY   = 1
+    EASY = 1
     MEDIUM = 2
-    HARD   = 3
+    HARD = 3
 
     def __str__(self):
         return self.name.title()
@@ -36,11 +40,15 @@ class Difficulty(Enum):
     # Returns the chosen algorithm
     @staticmethod
     def select_difficulty(option):
+        # assert types
+        assert isinstance(option, str), "Wrong parameter type"
+
+        # assert values
+        assert option in "123", "Wrong parameter"
+
         if option == '1':
             return Difficulty.EASY
         elif option == '2':
             return Difficulty.MEDIUM
-        elif option == '3':
-            return Difficulty.HARD
         else:
-            return None
+            return Difficulty.HARD

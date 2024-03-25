@@ -24,11 +24,11 @@ class Game:
     match_number = 1
 
     # Settings
-    algorithm     = Algorithm.ALPHA_BETA  # Algorithm enum
-    difficulty    = Difficulty.MEDIUM  # Difficulty enum
+    algorithm = Algorithm.ALPHA_BETA  # Algorithm enum
+    difficulty = Difficulty.HARD  # Difficulty enum
     player_symbol = Board.max_symbol  # max first, min second
-    pvp           = False  # PvP or PvE
-    gui           = True  # GUI or CLI
+    pvp = False  # PvP or PvE
+    gui = True  # GUI or CLI
 
     depths = {
     #   (n, 2)      (n, 3)      (n, 4)      (n, 5)     (n, 6)     (n, 7)
@@ -39,7 +39,6 @@ class Game:
         (6, 2):  6, (6, 3):  5, (6, 4):  4, (6, 5): 4, (6, 6): 3, (6, 7): 3,  # (6, m)
         (7, 2):  6, (7, 3):  4, (7, 4):  4, (7, 5): 3, (7, 6): 3, (7, 7): 2,  # (7, m)
     }
-
 
     # Singleton class
     @classmethod
@@ -61,12 +60,15 @@ class Game:
     # Resets the game
     @staticmethod
     def reset():
-        Game.game_board    = Board()
+        Game.game_board = Board()
         Game.completed_box = False
 
     # Quits the game, printing a heart if exiting from the main menu
     @staticmethod
     def quit(print_heart=False):
+        # assert types
+        assert isinstance(print_heart, bool), "Wrong parameter type"
+
         input_handler.clear_screen()
         if print_heart:
             heart.Heart().print_full_heart()
@@ -94,6 +96,9 @@ class Game:
     # Quits the match
     @staticmethod
     def quit_match(graphics=True):
+        # assert types
+        assert isinstance(graphics, bool), "Wrong parameter type"
+
         if graphics:
             Graphics().quit_graphics()
 
@@ -122,8 +127,8 @@ class Game:
             else:
                 print(f"Player {Board.min_symbol}: " + str(board.min_score) + " points", end="\n\n")
         else:
-            player_score    = board.max_score if Game.player_symbol == Board.max_symbol else board.min_score
-            computer_score  = board.min_score if Game.player_symbol == Board.max_symbol else board.max_score
+            player_score = board.max_score if Game.player_symbol == Board.max_symbol else board.min_score
+            computer_score = board.min_score if Game.player_symbol == Board.max_symbol else board.max_score
             computer_symbol = Board.min_symbol if Game.player_symbol == Board.max_symbol else Board.max_symbol
 
             if player_score == 1:
@@ -161,7 +166,8 @@ class Game:
                 Game.quit_match(False)
             else:
                 i, j = position.split('-')
-                if not i.isdigit() or not j.isdigit() or not Game.game_board.valid_position(int(i) - 1, int(j) - 1):
+                if not i.isdigit() or not j.isdigit() or \
+                   not Game.game_board.valid_position(int(i) - 1, int(j) - 1):
                     Game.get_coordinates_from_user()
                 Game.get_direction_from_user(int(i) - 1, int(j) - 1)
             return None
@@ -174,6 +180,10 @@ class Game:
     # Gets a direction from the user, from the previously selected point
     @staticmethod
     def get_direction_from_user(i, j):
+        # assert types
+        assert isinstance(i, int), "Wrong parameter type"
+        assert isinstance(j, int), "Wrong parameter type"
+
         input_handler.clear_screen()
         print(Game.get_instance())
 
@@ -184,7 +194,7 @@ class Game:
         board = Game.game_board
         options = board.get_direction_options(i, j)
 
-        # if it didn't find a possible direction from the current point, ask the user for another one
+        # if the point has no directions, ask the user for another one
         if len(options) == 0:
             Game.get_coordinates_from_user()
         # if there is only one option, make the move, no point asking the user to input it too
@@ -214,8 +224,8 @@ class Game:
 
     @staticmethod
     def get_gui_move_from_user(boxes):
-        game       = Game.get_instance()
-        board      = Game.game_board
+        game = Game.get_instance()
+        board = Game.game_board
         valid_move = False
 
         while not valid_move:
@@ -238,11 +248,20 @@ class Game:
 
     @staticmethod
     def computer_move(computer_move_count):
-        board      = Game.game_board
+        # assert types
+        assert isinstance(computer_move_count, int), "Wrong parameter type"
+
+        board = Game.game_board
         time_start = time.time()
+        depth = Game.depths[(Board.no_lines, Board.no_columns)]
+
+        if Game.difficulty == "Medium":
+            depth = depth // 2
+        elif Game.difficulty == "Easy":
+            depth = 1
 
         if Game.algorithm == Algorithm.IDA_STAR:
-            board.boxes = Ida_Star.get_move(board, Game.depths[(Board.no_lines, Board.no_columns)])
+            board.boxes = Ida_Star.get_move(board, depth)
 
             # count computer's mew score
             computer_score = 0
@@ -262,7 +281,7 @@ class Game:
                 board.completed_box = False
 
         elif Game.algorithm == Algorithm.ALPHA_BETA:
-            move = Alpha_Beta.get_move(board, Game.depths[(Board.no_lines, Board.no_columns)])
+            move = Alpha_Beta.get_move(board, depth)
 
             if move is None:
                 move = Alpha_Beta.get_move(board, 1)
@@ -292,6 +311,10 @@ class Game:
     # Writes the result of the match in the logs
     @staticmethod
     def write_result(result, time):
+        # assert types
+        assert isinstance(result, str), "Wrong parameter type"
+        assert isinstance(time, float), "Wrong parameter type"
+
         with open(path.join(Game.log_dir, 'match_history.txt'), 'a') as f:
             if Game.pvp:
                 f.write(f"Players   : Player {Board.max_symbol} - Player {Board.min_symbol}\n")
@@ -313,6 +336,9 @@ class Game:
     # For the CLI, that input means pressing any key to continue
     @staticmethod
     def print_result(time, boxes=[]):
+        # assert types
+        assert isinstance(time, float), "Wrong parameter type"
+
         input_handler.clear_screen()
 
         board = Game.game_board
@@ -329,7 +355,7 @@ class Game:
                 print("Player " + (f"{Board.max_symbol}" if board.max_score > board.min_score else f"{Board.min_symbol}") + " won!", time)
                 Game.write_result("1 - 0" if board.max_score > board.min_score else "0 - 1", time)
             else:
-                player_score   = board.max_score if Game.player_symbol == Board.max_symbol else board.min_score
+                player_score = board.max_score if Game.player_symbol == Board.max_symbol else board.min_score
                 computer_score = board.min_score if Game.player_symbol == Board.max_symbol else board.max_score
 
                 print(("Player " if player_score > computer_score else "Computer ") + "won!")
@@ -353,8 +379,8 @@ class Game:
     # Starts the game, looping until it's finished
     @staticmethod
     def play():
-        game                = Game.get_instance()
-        board               = Game.game_board
+        game = Game.get_instance()
+        board = Game.game_board
         computer_move_count = (1 if Game.player_symbol == Board.min_symbol else 2)
 
         if Game.gui:
@@ -392,10 +418,10 @@ class Game:
     # Selects the algorithm chosen by the user
     @staticmethod
     def change_algorithm():
-        options = "IDA*" + (" <-, " if Game.algorithm == Algorithm.IDA_STAR else ", ") \
-                + "Alpha-Beta" + (" <-, " if Game.algorithm == Algorithm.ALPHA_BETA else ", ") \
-                + "Bayesian Network" + (" <-, " if Game.algorithm == Algorithm.BAYESIAN_NETWORK else ", ") \
-                + "Back"
+        options = "IDA*" + (" <-, " if Game.algorithm == Algorithm.IDA_STAR else ", ") + \
+                  "Alpha-Beta" + (" <-, " if Game.algorithm == Algorithm.ALPHA_BETA else ", ") + \
+                  "Bayesian Network" + (" <-, " if Game.algorithm == Algorithm.BAYESIAN_NETWORK else ", ") + \
+                  "Back"
 
         try:
             option = input_handler.get_valid_input("< Choose an algorithm >", options)
@@ -408,10 +434,10 @@ class Game:
     # Selects the difficulty chosen by the user
     @staticmethod
     def change_difficulty():
-        options = "Easy" + (" <-, " if Game.difficulty == Difficulty.EASY else ", ") \
-                + "Medium" + (" <-, " if Game.difficulty == Difficulty.MEDIUM else ", ") \
-                + "Hard" + (" <-, " if Game.difficulty == Difficulty.HARD else ", ") \
-                + "Back"
+        options = "Easy" + (" <-, " if Game.difficulty == Difficulty.EASY else ", ") + \
+                  "Medium" + (" <-, " if Game.difficulty == Difficulty.MEDIUM else ", ") + \
+                  "Hard" + (" <-, " if Game.difficulty == Difficulty.HARD else ", ") + \
+                  "Back"
 
         try:
             option = input_handler.get_valid_input("< Choose a difficulty >", options)
@@ -484,6 +510,9 @@ class Game:
     # Writes the match number in the logs
     @staticmethod
     def write_match_number(file_name):
+        # assert types
+        assert isinstance(file_name, str), "Wrong parameter type"
+
         with open(path.join(Game.log_dir, f"{file_name}.txt"), 'w' if Game.match_number == 1 else 'a') as f:
             if Game.match_number != 1:
                 f.write("\n")
@@ -492,6 +521,9 @@ class Game:
     # Prints the logs to the screen
     @staticmethod
     def write_file(file_name):
+        # assert types
+        assert isinstance(file_name, str), "Wrong parameter type"
+
         input_handler.clear_screen()
 
         if Game.match_number != 1:
@@ -531,7 +563,7 @@ class Game:
 
                     Game.write_match_number("match_history")
                     Game.match_number += 1
-                    
+
                     Game.play()
                 elif option == '2':
                     Game.write_file("match_history")
