@@ -12,3 +12,7 @@ Move 20: Instant
 Move 22: Instant
 Move 24: Instant
 Move 26: Instant
+Move  0: 3.4861531257629395 seconds
+Move  0: 0.3055272102355957 seconds
+Move  0: 1.073603630065918 seconds
+Move  0: 0.3076155185699463 seconds

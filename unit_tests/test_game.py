@@ -18,7 +18,7 @@ class TestDotsAndBoxesGame(unittest.TestCase):
 
         self.assertEqual(game.match_number, 1)
         self.assertEqual(str(game.algorithm), "Alpha Beta")
-        self.assertEqual(str(game.difficulty), "Medium")
+        self.assertEqual(str(game.difficulty), "Hard")
         self.assertEqual(game.player_symbol, Board.max_symbol)
         self.assertEqual(game.pvp, False)
         self.assertEqual(game.gui, True)
